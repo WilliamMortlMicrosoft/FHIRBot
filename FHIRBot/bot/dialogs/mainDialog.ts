@@ -1,6 +1,7 @@
 import { Dialog, DialogSet, DialogTurnStatus, WaterfallDialog } from "botbuilder-dialogs";
 import { RootDialog } from "./rootDialog";
 import {
+  ActionTypes,
   ActivityTypes,
   CardFactory,
   Storage,
@@ -15,6 +16,7 @@ import {
   TeamsBotSsoPrompt,
 } from "@microsoft/teamsfx";
 import "isomorphic-fetch";
+import { FHIR_WATERFALL_DIALOG } from "./dialogConstants";
 
 const MAIN_DIALOG = "MainDialog";
 const MAIN_WATERFALL_DIALOG = "MainWaterfallDialog";
@@ -35,6 +37,14 @@ export class MainDialog extends RootDialog {
         scopes: this.requiredScopes,
         endOnInvalidMessage: true,
       })
+    );
+
+    this.addDialog(
+      new WaterfallDialog(FHIR_WATERFALL_DIALOG, [
+        this.ssoStep.bind(this),
+        this.dedupStep.bind(this),
+        this.showFhirResults.bind(this)
+      ])
     );
 
     this.addDialog(
@@ -79,6 +89,27 @@ export class MainDialog extends RootDialog {
     return await stepContext.next(tokenResponse);
   }
 
+  async showFhirResults(stepContext: any) {
+    // Token is available here to query FHIR
+    console.log('stepContext: ', stepContext);
+
+    const cardButtons = [
+      {
+        type: ActionTypes.ImBack,
+        title: "Show introduction card",
+        value: "intro",
+      },
+    ];
+    const card = CardFactory.heroCard("", null, cardButtons, {
+      text: `Your token: ${stepContext.result.ssoToken}`,
+    });
+
+    await stepContext.context.sendActivity({ attachments: [card] });
+
+    this.initialDialogId = MAIN_WATERFALL_DIALOG;
+    return await stepContext.endDialog();
+  }
+
   async showUserInfo(stepContext: any) {
     const tokenResponse = stepContext.result;
     if (tokenResponse) {
@@ -114,6 +145,8 @@ export class MainDialog extends RootDialog {
         await stepContext.context.sendActivity("Getting profile from Microsoft Graph failed! ");
       }
 
+
+      this.initialDialogId = MAIN_WATERFALL_DIALOG;
       return await stepContext.endDialog();
     }
 
