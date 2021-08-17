@@ -48,6 +48,10 @@
                         {
                             "title": "show",
                             "description": "Show user profile by calling Microsoft Graph API with SSO"
+                        },
+                        {
+                            "title": "fhir",
+                            "description": "queries the fhir databse for recrods"
                         }
                     ]
                 }
