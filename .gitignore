@@ -1,4 +1,4 @@
 node_modules
-/.fx/*.env
-/.fx/*.userdata
+/FHIRBot/.fx/*.env
+/FHIRBot/.fx/*.userdata
 .DS_Store
