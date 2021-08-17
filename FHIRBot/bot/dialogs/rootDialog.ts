@@ -52,6 +52,21 @@ export class RootDialog extends ComponentDialog {
         await innerDc.context.sendActivity({ attachments: [card] });
         return await innerDc.cancelAllDialogs();
       }
+      case "fhir": {
+        const cardButtons = [
+          {
+            type: ActionTypes.ImBack,
+            title: "Show FHIR results",
+            value: "fhir",
+          },
+        ];
+        const card = CardFactory.heroCard("FHIR", null, cardButtons, {
+          text: `Here are your FHIR results!`,
+        });
+
+        await innerDc.context.sendActivity({ attachments: [card] });
+        return await innerDc.cancelAllDialogs();
+      }
       default: {
         const cardButtons = [
           {
